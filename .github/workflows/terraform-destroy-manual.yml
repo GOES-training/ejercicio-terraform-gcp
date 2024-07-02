@@ -2,6 +2,23 @@ name: Terraform Destroy VM + K8S
 
 on:
   workflow_dispatch:
+    inputs:
+      destroy_vm:
+        description: 'Destroy VM resources'
+        required: true
+        default: 'not'
+        type: choice
+        options:
+          - 'yes'
+          - 'not'
+      destroy_k8s:
+        description: 'Destroy K8S resources'
+        required: true
+        default: 'not'
+        type: choice
+        options:
+          - 'yes'
+          - 'not'
 
 jobs:
   terraform-destroy:
@@ -36,15 +53,16 @@ jobs:
         TF_VAR_credentials_file_path: /home/runner/gcloud.json
         TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-#    - name: Apply Terraform Destroy VM
-#      run: terraform -chdir=ejercicio-vm-02/terraform destroy -auto-approve
-#      env:
-#        GOOGLE_APPLICATION_CREDENTIALS: /home/runner/gcloud.json
-#        TF_VAR_credentials_file_path: /home/runner/gcloud.json
-#        TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+    - name: Apply Terraform Destroy VM
+      if: ${{ github.event.inputs.destroy_vm == 'yes' }}
+      run: terraform -chdir=ejercicio-vm-02/terraform destroy -auto-approve
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: /home/runner/gcloud.json
+        TF_VAR_credentials_file_path: /home/runner/gcloud.json
+        TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
 
     - name: Terraform Init K8S
-      run: terraform -chdir=ejercicio-vm-02/terraform init
+      run: terraform -chdir=ejercicio-kubernetes/terraform init
       env:
         GOOGLE_APPLICATION_CREDENTIALS: /home/runner/gcloud.json
         TF_VAR_credentials_file_path: /home/runner/gcloud.json
@@ -57,10 +75,10 @@ jobs:
         TF_VAR_credentials_file_path: /home/runner/gcloud.json
         TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
   
-#    - name: Apply Terraform Destroy K8S
-#      run: terraform -chdir=ejercicio-kubernetes/terraform destroy -auto-approve
-#      env:
-#        GOOGLE_APPLICATION_CREDENTIALS: /home/runner/gcloud.json
-#        TF_VAR_credentials_file_path: /home/runner/gcloud.json
-#        TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-  
+    - name: Apply Terraform Destroy K8S
+      if: ${{ github.event.inputs.destroy_k8s == 'yes' }}
+      run: terraform -chdir=ejercicio-kubernetes/terraform destroy -auto-approve
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: /home/runner/gcloud.json
+        TF_VAR_credentials_file_path: /home/runner/gcloud.json
+        TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
